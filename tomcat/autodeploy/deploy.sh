@@ -112,7 +112,9 @@ for x in $(find $DEPLOY_DIRECTORY -type f -name "*.war");
       if [ -f $TARGET_DIRECTORY/$file ];then
         echo `date +"%b %d %T"`" "`hostname`" $APPID: Application "$file" successfully copied">>$LOG
       else
-        echo `date +"%b %d %T"`" "`hostname`" $APPID: failed to copy application "$file" successfully copied....Exiting">>$LOG
+        echo `date +"%b %d %T"`" "`hostname`" $APPID: failed to copy application "$file" ....Exiting">>$LOG
+        echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+        exit
       fi
      else
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Failed to backup file " $file " Exiting">>$LOG
