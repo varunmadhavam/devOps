@@ -1,4 +1,4 @@
-From oracle 12c the processes run under oracle rather that orasid. But while using normal PS command we could see that the oracle 
+From oracle 12c the processes run under oracle rather that orasid/sidadm. But while using normal PS command we could see that the oracle 
 processesrunning under both oracle as well as sidadm user. This is beacuse ps show real user id by default and not effective user id. 
 Follwoingcommands can be used to obtain the real and effctive user ids of running processes.
 
