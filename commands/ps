@@ -1,0 +1,3 @@
+•	hp-ux : UNIX95= ps -ef -o pid,user,ruser,comm|grep -i oracle
+
+•	linux : ps -eo pid,euser,ruser,args|grep -i oracle
