@@ -40,32 +40,35 @@ while [ $(ps -ef | grep -i catalina.startup.Bootstrap| grep -v grep|wc -l) -ne 0
   if [ $i -eq $STOP_TIMEOUT ]; then
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Tomcat didnt stop after 60 seconds...Exiting">>$LOG
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+    echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
     exit
-  else 
+  else
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Waiting 5 seconds for Tomcat Shutdown">>$LOG
     sleep 5
     i=`expr $i + 1`
-  fi 
+  fi
  done
 echo `date +"%b %d %T"`" "`hostname`" $APPID: Tomcat services stopped.">>$LOG
 }
 
-function is_running 
+function is_running
 {
 if [ -f $APP_ROOT/$APPID.pid ]; then
    echo `date +"%b %d %T"`" "`hostname`" $APPID: File $APP_ROOT/$APPID.pid exists">>$LOG
    echo `date +"%b %d %T"`" "`hostname`" $APPID: A deploymet process is already running of was killed abruptly. Kindly check!!!">>$LOG
    echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+   echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
    exit
 else
    echo `date +"%b %d %T"`" "`hostname`" $APPID: No deploymnet job running...Continuing">>$LOG
    echo `date +"%b %d %T"`" "`hostname`" $APPID: Creating Pid file">>$LOG
    touch $APP_ROOT/$APPID.pid 2>&1>>$LOG
    if [ -f $APP_ROOT/$APPID.pid ]; then
-      echo `date +"%b %d %T"`" "`hostname`" $APPID: Pid file createde">>$LOG
+      echo `date +"%b %d %T"`" "`hostname`" $APPID: Pid file created">>$LOG
    else
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Error creating Pid file...Exiting..!!">>$LOG
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+      echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
       exit
    fi
 fi
@@ -79,6 +82,7 @@ if [ -f $DEPLOY_DIRECTORY/dodeploy ]; then
    if [ $? -ne 0 ];then
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Error removing deploy flag..exiting">>$LOG
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+    echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
     exit
    fi
 else
@@ -90,10 +94,10 @@ fi
 
 function sync_files
 {
-for x in $(find $DEPLOY_DIRECTORY -type f -name "*.war"); 
- do  
+for x in $(find $DEPLOY_DIRECTORY -type f -name "*.war");
+ do
   file=`basename $x`
-  folder=${file%.*} 
+  folder=${file%.*}
   if [ -f $TARGET_DIRECTORY/$file ]; then
      echo `date +"%b %d %T"`" "`hostname`" $APPID: Backing up file " $TARGET_DIRECTORY/$file " as " $BACKUP/$file.bak>>$LOG
      if [ -f $BACKUP/$file.bak ]; then
@@ -106,20 +110,22 @@ for x in $(find $DEPLOY_DIRECTORY -type f -name "*.war");
      if [ -f $BACKUP/$file.bak ]; then
       echo `date +"%b %d %T"`" "`hostname`" $APPID: File " $file " successfully backed up">>$LOG
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Cleaning files realted to application "$file>>$LOG
-      echo `date +"%b %d %T"`" "`hostname`" $APPID: Removing file "$file;rm -rf --interactive=never $TARGET_DIRECTORY/$file 2>&1>>$LOG
-      echo `date +"%b %d %T"`" "`hostname`" $APPID: Removing folder "$folder;rm -rf --interactive=never $TARGET_DIRECTORY/$folder 2>&1>>$LOG
+      echo `date +"%b %d %T"`" "`hostname`" $APPID: Removing file "$file>>$LOG;rm -rf --interactive=never $TARGET_DIRECTORY/$file 2>&1>>$LOG
+      echo `date +"%b %d %T"`" "`hostname`" $APPID: Removing folder "$folder>>$LOG;rm -rf --interactive=never $TARGET_DIRECTORY/$folder 2>&1>>$LOG
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Copying new files for application "$file>>$LOG
       echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;cp -pv $DEPLOY_DIRECTORY/$file $TARGET_DIRECTORY>>$LOG
       if [ -f $TARGET_DIRECTORY/$file ];then
-	echo `date +"%b %d %T"`" "`hostname`" $APPID: Application "$file" successfully copied">>$LOG
+        echo `date +"%b %d %T"`" "`hostname`" $APPID: Application "$file" successfully copied">>$LOG
       else
-	echo `date +"%b %d %T"`" "`hostname`" $APPID: failed to copy application "$file" ...Exiting">>$LOG
+        echo `date +"%b %d %T"`" "`hostname`" $APPID: failed to copy application "$file" ...Exiting">>$LOG
         echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+        echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
         exit
       fi
      else
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Failed to backup file " $file " Exiting">>$LOG
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+      echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
       exit
      fi
   else
@@ -134,19 +140,20 @@ echo `date +"%b %d %T"`" "`hostname`" $APPID: Checking appp deployment status">>
 apps=$(echo $APPS | tr ":" "\n")
 j=0
 retry=true
-while $retry 
+while $retry
 do
 retry=false
   if [ $j -eq $DEPLOY_TIMEOUT ]; then
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Apps didnot deploy after 5 minutes...Exiting...!">>$LOG
       echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+      echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
       exit
   else
       j=`expr $j + 1`
   fi
   manager=$(curl --connect-timeout 10 -m 60 -u $MNGUSER:$MNGPASSWD $MANAGER_URL 2>/dev/null)
-  for app  in $apps; 
-    do 
+  for app  in $apps;
+    do
       if [ $(echo "$manager"| grep -w "/$app</a>"|wc -l) -eq 1 ]; then
          echo `date +"%b %d %T"`" "`hostname`" $APPID: Application "$app" deployed">>$LOG
       else
@@ -159,6 +166,7 @@ retry=false
    done
 done
 remove_pid
+echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  $APP_ROOT/sentmails.py 2>&1>>$LOG
 echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Successfull">>$LOG
 }
 
@@ -173,6 +181,7 @@ if [ $? -eq 0 ]; then
 echo `date +"%b %d %T"`" "`hostname`" $APPID: Port $TOMCAT_PORT is active..Not attempting tomcat start...Exiting">>$LOG
 echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
 exit
+echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
 else
 cd $TOMCAT_VERSION/bin
 ./startup.sh 2>&1>>/dev/null
@@ -182,6 +191,7 @@ do
   if [ $k -eq $START_TIMEOUT ]; then
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Tomcat didnt start after 60 seconds...Exiting">>$LOG
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment Failed">>$LOG
+    echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
     exit
   else
     echo `date +"%b %d %T"`" "`hostname`" $APPID: Waiting 5 seconds for Tomcat Startup">>$LOG
@@ -194,25 +204,27 @@ echo `date +"%b %d %T"`" "`hostname`" $APPID: Port $TOMCAT_PORT is now active">>
 
 function wait_for_deployment
 {
-echo 0 > flag
+echo 0 > $APP_ROOT/flag
 echo `date +"%b %d %T"`" "`hostname`" $APPID: Waiting max "$DEPLOY_WAIT" seconds for Tomcat to deploy apps and start">>$LOG
 timeout  $DEPLOY_WAIT tail -n0 -F $TOMCAT_LOG | while read LOGLINE
 do
-   [[ "${LOGLINE}" == *"INFO: Server startup in"* ]]  && echo 1 > flag && pkill -P $$ timeout
+   [[ "${LOGLINE}" == *"INFO: Server startup in"* ]]  && echo 1 > $APP_ROOT/flag && pkill -P $$ timeout
 done
-x=$(cat flag)
+x=$(cat $APP_ROOT/flag)
 if [ $x -eq 0 ]; then
    echo `date +"%b %d %T"`" "`hostname`" $APPID: Tomcat deployment didn't complete after "$DEPLOY_WAIT" seconds...exiting">>$LOG
    echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment failed">>$LOG
+   echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
    exit
 elif [ $x -eq 1 ]; then
-   echo `date +"%b %d %T"`" "`hostname`" $APPID: Tomcat service started">>$LOG 
+   echo `date +"%b %d %T"`" "`hostname`" $APPID: Tomcat service started">>$LOG
 else
-   echo `date +"%b %d %T"`" "`hostname`" $APPID: Unexpected retunr from timeout...Exiting">>$LOG
+   echo `date +"%b %d %T"`" "`hostname`" $APPID: Unexpected return from timeout...Exiting">>$LOG
    echo `date +"%b %d %T"`" "`hostname`" $APPID: Deployment failed">>$LOG
+   echo -n `date +"%b %d %T"`" "`hostname`" $APPID: ">>$LOG;python  sentmailf.py 2>&1>>$LOG
    exit
 fi
-echo 0 > flag
+echo 0 > $APP_ROOT/flag
 }
 
 is_running
