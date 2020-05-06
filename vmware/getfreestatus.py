@@ -92,12 +92,12 @@ for datastore in datastores:
         margin=initial_margin + ((datastoresdict[datastore.get("name")]-1)*scale)
         if free < margin :
                 if debug:
-                        prRed("free space check failed for datastore "+datastore.get("name")+" ; free : "+str(free)+"%"+" margin : "+str(margin)+"%")
+                        prRed("free space check failed for datastore "+datastore.get("name")+" ; free : "+"{:.2f}".format(free)+"%"+" margin : "+str(margin)+"%")
                         error=1
                 else:
                         error=1
                         break
         else:
                 if debug:
-                        prGreen("free space check succedded for datastore "+datastore.get("name")+" ; free : "+str(free)+"%"+" margin : "+str(margin)+"%")
+                        prGreen("free space check succedded for datastore "+datastore.get("name")+" ; free : "+"{:.2f}".format(free)+"%"+" margin : "+str(margin)+"%")
 exit(error)
